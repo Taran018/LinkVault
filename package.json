@@ -1,0 +1,36 @@
+{
+  "name": "linkvault",
+  "version": "0.1.0",
+  "description": "Full-stack URL shortener with click tracking and optional expiry",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --forceExit --config=jest.config.json",
+    "lint": "eslint src tests"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "url-shortener",
+    "express",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "mongoose": "^9.11.3",
+    "nanoid": "^3.3.20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.13.0",
+    "jest": "^30.5.2",
+    "mongodb-memory-server": "^11.3.0",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.3.1"
+  }
+}

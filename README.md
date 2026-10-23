@@ -1,0 +1,44 @@
+# LinkVault
+
+A full-stack URL shortener built for a college club recruitment task.
+
+## Features
+- Short-link generation (random 7-char code or custom alias)
+- Server-side HTTP 302 redirect
+- Atomic click counting
+- Optional link expiry (410 Gone when expired)
+- Per-link stats (total clicks + 7-day breakdown)
+
+## Stack
+- **Backend:** Node.js 20+, Express 4, MongoDB Atlas (Mongoose), CommonJS
+- **Frontend:** Plain HTML, CSS, vanilla JS (no build step)
+- **Tests:** Jest + Supertest + mongodb-memory-server
+- **Deploy:** Render
+
+## Setup
+
+```bash
+# 1. Clone and install
+git clone <repo-url>
+cd linkvault
+npm install
+
+# 2. Create your .env from the template
+cp .env.example .env
+# Fill in MONGO_URI with your Atlas connection string
+
+# 3. Start the dev server
+npm run dev
+# → http://localhost:3000/health should return {"status":"ok"}
+```
+
+## Scripts
+| Command | What it does |
+|---------|-------------|
+| `npm run dev` | Start with nodemon (auto-restart) |
+| `npm start` | Production start |
+| `npm test` | Run all Jest tests |
+| `npm run lint` | ESLint |
+
+## Live URL
+_To be added after Render deploy (Phase 6)._

@@ -1,0 +1,12 @@
+# dependencies
+node_modules/
+
+# secrets — never commit the real .env file
+.env
+
+# test coverage output
+coverage/
+
+# OS noise
+.DS_Store
+Thumbs.db
