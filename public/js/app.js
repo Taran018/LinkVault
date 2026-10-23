@@ -49,6 +49,10 @@ function formatExpiry(expiresAt) {
  * Uses textContent — never innerHTML — to prevent XSS.
  */
 function showFormError(msg) {
+  if (!msg) {
+    clearFormError();
+    return;
+  }
   formError.textContent = msg;
   formError.hidden = false;
 }
@@ -62,6 +66,10 @@ function clearFormError() {
  * Show a banner error above the links table.
  */
 function showTableError(msg) {
+  if (!msg) {
+    clearTableError();
+    return;
+  }
   tableError.textContent = msg;
   tableError.hidden = false;
 }
@@ -158,6 +166,7 @@ function setTableLoading(loading) {
  * Render the empty state (no links exist).
  */
 function renderEmpty() {
+  loadingState.hidden = true;
   emptyState.hidden = false;
   tableWrapper.hidden = true;
 }
@@ -251,8 +260,9 @@ function renderTable(links) {
     linksBody.appendChild(createRow(link));
   });
 
-  tableWrapper.hidden = false;
+  loadingState.hidden = true;
   emptyState.hidden = true;
+  tableWrapper.hidden = false;
 }
 
 // ── Load links from the API ──────────────────────────────────
@@ -270,8 +280,10 @@ async function loadLinks() {
       renderTable(links);
     }
   } catch (err) {
-    showTableError(err.message);
-    renderEmpty(); // show empty state so the table area isn't just a spinner
+    showTableError(err.message || 'Failed to load links.');
+    // Keep loading, empty, and table states mutually exclusive
+    emptyState.hidden = true;
+    tableWrapper.hidden = true;
   } finally {
     setTableLoading(false);
   }
@@ -292,6 +304,7 @@ async function handleDelete(code, rowEl) {
   );
   if (!confirmed) return;
 
+  clearTableError();
   // Animate row out first for a snappy feel.
   rowEl.classList.add('row-deleting');
 
@@ -309,8 +322,7 @@ async function handleDelete(code, rowEl) {
   } catch (err) {
     // Revert animation if delete failed.
     rowEl.classList.remove('row-deleting');
-    clearTableError();
-    showTableError(err.message);
+    showTableError(err.message || 'Failed to delete link.');
   }
 }
 
@@ -339,15 +351,18 @@ async function handleCreate(event) {
       expiresAt: expiresAt || undefined,
     });
 
+    // Clear any previous table-level error banner
+    clearTableError();
+
     // Show the result card.
     showResult(link);
 
-    // Prepend the new row to the table (or replace the empty state).
-    if (!tableWrapper.hidden) {
-      // Table is already visible — prepend the new row.
+    // Prepend the new row to the table (or replace the empty/error state).
+    if (!tableWrapper.hidden && linksBody.children.length > 0) {
+      // Table is already visible and has rows — prepend the new row.
       linksBody.insertBefore(createRow(link), linksBody.firstChild);
     } else {
-      // Table was hidden (empty state) — render the table with this row.
+      // Table was hidden (empty or error state) — render the table with this row.
       renderTable([link]);
     }
 
