@@ -2,8 +2,22 @@
 
 // Supertest lets us make HTTP requests directly to the Express app without
 // starting a real server on a port — much faster and no port conflicts in CI.
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const mongoose = require('mongoose');
 const request = require('supertest');
 const app = require('../src/app');
+
+let mongod;
+
+beforeAll(async () => {
+  mongod = await MongoMemoryServer.create();
+  await mongoose.connect(mongod.getUri());
+}, 60000);
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongod.stop();
+}, 30000);
 
 // Jest wraps each describe block in an isolated scope.
 // We only test the health endpoint here; other modules will have their own

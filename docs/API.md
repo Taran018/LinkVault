@@ -19,9 +19,13 @@ Body: `{ "url": "https://example.com/long", "alias": "join-club" (optional), "ex
 - 204 no body | 404 `NOT_FOUND`
 
 ## GET /:code
-- 302 redirect to `longUrl` (click recorded) — always issued regardless of `Accept` header.
-- 404 `NOT_FOUND` | 410 `EXPIRED`
-- **Content negotiation for errors:** return a minimal static HTML page when `Accept` contains `text/html` with a positive quality value (typical browser request). Return JSON `{ error: { code, message } }` when `Accept` is absent, is `*/*` only, or contains no `text/html` entry. HTML error pages never render unescaped user-controlled data.
+- 302 Found: redirect to `longUrl` (`Location: <longUrl>`), atomic `$inc` click counter, best-effort `Click` event logged. Always issued for valid, unexpired short links regardless of `Accept` header.
+- 404 `NOT_FOUND`: link does not exist.
+- 410 `EXPIRED`: link exists but has expired according to database cluster time (`$$NOW`).
+- **Content negotiation for 404/410 errors:**
+  - Returns a minimal, sanitized HTML error page only when `Accept` explicitly specifies `text/html` with a valid positive quality factor ($q > 0$).
+  - Defaults to JSON `{ "error": { "code": "...", "message": "..." } }` when `Accept` is missing, is `*/*` only, specifies `text/html;q=0`, or contains malformed parameters.
+  - HTML error pages render sanitized HTML entities to prevent XSS.
 
 ## GET /health
 - 200: `{ "status": "ok" }`

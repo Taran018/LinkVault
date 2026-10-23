@@ -3,6 +3,7 @@
 const express = require('express');
 const healthRouter = require('./routes/health.routes');
 const linksRouter = require('./routes/links.routes');
+const redirectRouter = require('./routes/redirect.routes');
 const errorHandler = require('./middleware/errorHandler');
 
 // app.js creates and configures the Express application object but does NOT
@@ -26,6 +27,9 @@ app.use(express.static('public'));
 
 app.use('/', healthRouter);
 app.use('/', linksRouter);
+// Short-code redirect (GET /:code) MUST be mounted after specific routes
+// so /health and /api/... are never intercepted by /:code
+app.use('/', redirectRouter);
 
 // 404 catch-all — if no route matched, create an operational error and hand
 // it to the error handler below.

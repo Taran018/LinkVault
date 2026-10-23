@@ -32,10 +32,11 @@ Express app (Render)  --------------------------
 `clicks` (one document per visit)
 | field | type | notes |
 |---|---|---|
-| code | String | indexed |
-| at | Date | indexed together with code |
-| referrer | String | optional |
-| userAgent | String | optional, truncated |
+| linkId | ObjectId | required, indexed together with at |
+| code | String | indexed snapshot of code at visit time |
+| at | Date | default Date.now |
+| referrer | String | optional, truncated to 2048 chars |
+| userAgent | String | optional, truncated to 512 chars |
 
 ## Key decisions (with trade-offs)
 | Decision | Why | Trade-off |
@@ -43,12 +44,13 @@ Express app (Render)  --------------------------
 | Server-side 302 | Works for all clients, no JS needed, standard behaviour | Each click hits our server |
 | 302 not 301 | Browsers do not cache 302, so every click is counted | Slightly more load |
 | Random 7-char code with unique index | Simple, collision-safe via retry | Not sequential, not guessable |
-| Atomic `$inc` | Correct under concurrent clicks | None meaningful |
-| Separate `clicks` collection | Enables time-series stats | Extra write per click |
+| Atomic `$inc` with database-side `$$NOW` | Correct under concurrent clicks; evaluates expiry on database engine | Requires MongoDB 4.2+ |
+| Best-effort Click event persistence | Redirects never blocked if event logging fails | Counter and event log may have minor disparities on storage failure |
+| Separate `clicks` collection | Enables time-series stats with stable `linkId` | Extra write per click |
 | 410 Gone for expired | Tells clients the link existed and is gone | Record kept, so storage grows |
 | One service serves API and frontend | Single deploy, no CORS | Cannot scale them independently |
 | MongoDB | Flexible, free Atlas tier, easy for first backend | Relational DB also fine |
-| Content negotiation via `Accept` header (Gap 4) | Valid short codes always 302 regardless of Accept. For 404/410, return minimal HTML only when the client sends `Accept: text/html` with a positive quality value (e.g. browsers). Missing header or `*/*`-only defaults to JSON. HTML responses never contain unescaped user-controlled data. | Slightly more logic in the redirect controller |
+| Content negotiation via `Accept` header (Gap 4) | Valid short codes always 302 regardless of Accept. For 404/410, return minimal HTML only when client explicitly requests `text/html` with positive quality factor ($q > 0$). Missing header or `*/*` defaults to JSON. HTML responses never contain unescaped user data. | Slightly more logic in the redirect controller |
 | URL normalisation via WHATWG `URL` constructor (Gap 6) | Trim whitespace; reject missing or non-http(s) schemes (no auto-prepend); use `new URL()` for hostname case-folding and default-port stripping; preserve path, query, fragment and trailing-slash as submitted. | WHATWG parser is built into Node — no extra dependency |
 
 ## Folder structure
