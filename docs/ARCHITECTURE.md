@@ -45,7 +45,7 @@ Express app (Render)  --------------------------
 | 302 not 301 | Browsers do not cache 302, so every click is counted | Slightly more load |
 | Random 7-char code with unique index | Simple, collision-safe via retry | Not sequential, not guessable |
 | Atomic `$inc` with database-side `$$NOW` | Correct under concurrent clicks; evaluates expiry on database engine | Requires MongoDB 4.2+ |
-| Best-effort Click event persistence | Redirects never blocked if event logging fails | Counter and event log may have minor disparities on storage failure |
+| Best-effort Click event persistence | Redirects are never blocked if event logging fails | Link counter increment and Click event insertion are separate operations; an insertion failure can cause a discrepancy between summary clicks and event logs that persists indefinitely (no retry or reconciliation mechanism) |
 | Separate `clicks` collection | Enables time-series stats with stable `linkId` | Extra write per click |
 | 410 Gone for expired | Tells clients the link existed and is gone | Record kept, so storage grows |
 | One service serves API and frontend | Single deploy, no CORS | Cannot scale them independently |

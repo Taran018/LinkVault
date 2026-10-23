@@ -11,6 +11,7 @@ Update this after every phase. Read it before the interview.
 - Why 302 and not 301? (browsers cache 301, so later clicks would bypass the server and not be counted)
 - How do you avoid duplicate codes? (unique index plus retry on duplicate key error)
 - What if two people click at the same instant? (atomic `$inc`, no lost updates)
+- What happens if click event insertion fails? (The Link counter increment and Click event insertion are separate operations. To prevent breaking the user's redirect, an event write failure is logged safely while the 302 redirect completes. Because there is no background retry or reconciliation mechanism, this can cause a discrepancy between summary clicks and event records that persists indefinitely.)
 - How do you stop malicious links? (http/https allowlist, length limit, rate limiting; not a full safe-browsing check)
 - How would you scale it? (cache hot codes in Redis, write clicks asynchronously via a queue, add an index on `code`, shard by code)
 - What would you add with more time? (auth, per-user dashboards, QR codes, safe-browsing check, custom domains)
