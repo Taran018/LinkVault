@@ -102,6 +102,19 @@ describe('validateUrl', () => {
       expect(() => validateUrl('http://localhost:3000/anything')).toThrow(
         expect.objectContaining({ code: 'INVALID_URL' })
       );
+      expect(() => validateUrl('http://localhost:3000')).toThrow(
+        expect.objectContaining({ code: 'INVALID_URL' })
+      );
+      expect(() => validateUrl('http://localhost:3000/nested/path?q=1#frag')).toThrow(
+        expect.objectContaining({ code: 'INVALID_URL' })
+      );
+    });
+
+    it('permits URLs with different origin than this service', () => {
+      // Different port
+      expect(validateUrl('http://localhost:8080/path')).toBe('http://localhost:8080/path');
+      // Different protocol
+      expect(validateUrl('https://localhost:3000/path')).toBe('https://localhost:3000/path');
     });
   });
 });

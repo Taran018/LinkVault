@@ -74,19 +74,14 @@ function validateUrl(rawUrl) {
   }
 
   // Prevent redirect loops: block URLs that point back at this service.
-  // We compare normalised origins (scheme + host + port).
-  try {
-    const serviceOrigin = new URL(HOST).origin;
-    if (parsed.origin === serviceOrigin) {
-      throw new AppError(
-        400,
-        'INVALID_URL',
-        'URLs pointing to this service are not allowed.'
-      );
-    }
-  } catch (err) {
-    // Re-throw AppError; ignore malformed HOST env var (skip the check).
-    if (err instanceof AppError) throw err;
+  // We compare normalised origins (scheme + host + port). HOST is validated at startup.
+  const serviceOrigin = new URL(HOST).origin;
+  if (parsed.origin === serviceOrigin) {
+    throw new AppError(
+      400,
+      'INVALID_URL',
+      'URLs pointing to this service are not allowed.'
+    );
   }
 
   // Return the WHATWG-normalised URL string.
