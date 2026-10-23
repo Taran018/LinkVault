@@ -32,6 +32,19 @@ npm run dev
 # → http://localhost:3000/health should return {"status":"ok"}
 ```
 
+## Frontend
+
+After `npm run dev`, open **http://localhost:3000** in a browser.
+
+The single-page dashboard lets you:
+- **Create** a short link (optional custom alias, optional expiry date)
+- **Copy** the short URL to your clipboard with one click
+- **Open** a short link — the server issues the HTTP 302 redirect
+- **Delete** a link (with confirmation dialog)
+
+Empty, loading, and error states are all handled in the UI.  
+No framework, no build step — plain HTML, CSS, and vanilla JS in `public/`.
+
 ## Scripts
 | Command | What it does |
 |---------|-------------|

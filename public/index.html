@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LinkVault – create short links, track clicks, and manage optional link expiry." />
+  <title>LinkVault – URL Shortener</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <header class="site-header" role="banner">
+    <div class="container">
+      <div class="logo" aria-label="LinkVault">
+        <div class="logo-icon" aria-hidden="true">🔗</div>
+        <span class="logo-text">LinkVault</span>
+      </div>
+      <p class="site-tagline">Short links, tracked clicks, optional expiry.</p>
+    </div>
+  </header>
+
+  <!-- ── Main content ────────────────────────────────────────── -->
+  <main>
+    <div class="container">
+
+      <!-- Create form -->
+      <section id="create-section" aria-labelledby="create-heading">
+        <div class="card">
+          <h1 id="create-heading" class="section-heading">Create a short link</h1>
+
+          <form id="create-form" novalidate>
+            <div class="form-grid">
+
+              <!-- URL input (required) -->
+              <div class="field">
+                <label for="input-url">Destination URL</label>
+                <input
+                  type="url"
+                  id="input-url"
+                  name="url"
+                  placeholder="https://example.com/very-long-path"
+                  autocomplete="off"
+                  spellcheck="false"
+                  required
+                />
+              </div>
+
+              <!-- Optional alias + expiry on the same row -->
+              <div class="form-row">
+                <div class="field">
+                  <label for="input-alias">
+                    Custom alias
+                    <span class="optional">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="input-alias"
+                    name="alias"
+                    placeholder="my-link"
+                    minlength="3"
+                    maxlength="20"
+                    autocomplete="off"
+                    spellcheck="false"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="input-expires">
+                    Expires at
+                    <span class="optional">(optional)</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    id="input-expires"
+                    name="expiresAt"
+                  />
+                </div>
+              </div>
+
+              <!-- Submit -->
+              <button
+                type="submit"
+                id="btn-create"
+                class="btn btn-primary btn-submit"
+              >
+                Shorten URL
+              </button>
+
+            </div><!-- /form-grid -->
+          </form>
+
+          <!-- Inline form error -->
+          <div
+            id="form-error"
+            class="error-msg"
+            role="alert"
+            aria-live="assertive"
+            hidden
+          ></div>
+
+        </div><!-- /card -->
+      </section>
+
+      <!-- Result card (hidden until a link is created) -->
+      <div id="result-card" class="card" hidden aria-live="polite">
+        <div class="result-header">Link created successfully</div>
+
+        <div class="result-url-row">
+          <a
+            id="result-short-url"
+            class="result-short-url"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open short link in a new tab"
+          ></a>
+          <button
+            type="button"
+            id="btn-copy"
+            class="btn btn-copy"
+            aria-label="Copy short URL to clipboard"
+          >
+            Copy
+          </button>
+        </div>
+
+        <div class="result-meta">
+          <span>
+            Clicks: <strong id="result-clicks">0</strong>
+          </span>
+          <span id="result-expiry-meta"></span>
+        </div>
+      </div>
+
+      <!-- Dashboard -->
+      <section id="dashboard-section" aria-labelledby="dashboard-heading">
+        <div class="dashboard-header">
+          <h2 id="dashboard-heading" class="section-heading" style="margin-bottom:0">
+            Your links
+          </h2>
+        </div>
+
+        <!-- Table error banner -->
+        <div
+          id="table-error"
+          class="error-msg"
+          role="alert"
+          aria-live="assertive"
+          hidden
+        ></div>
+
+        <!-- Loading state -->
+        <div id="loading-state" aria-label="Loading your links">
+          <div class="spinner" aria-hidden="true"></div>
+          Loading your links…
+        </div>
+
+        <!-- Empty state -->
+        <div id="empty-state" hidden>
+          <div class="empty-icon" aria-hidden="true">🔗</div>
+          <p class="empty-title">No links yet</p>
+          <p class="empty-sub">Create your first short link above.</p>
+        </div>
+
+        <!-- Table wrapper (scroll on small screens) -->
+        <div class="table-wrapper" hidden id="table-wrapper">
+          <table id="links-table" aria-describedby="dashboard-heading">
+            <caption>All shortened links, newest first</caption>
+            <thead>
+              <tr>
+                <th scope="col">Short code</th>
+                <th scope="col">Destination</th>
+                <th scope="col">Expires</th>
+                <th scope="col">Clicks</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="links-body">
+              <!-- Rows injected by app.js -->
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- Scripts: type="module" defers automatically and scopes to module -->
+  <script type="module" src="/js/api.js"></script>
+  <script type="module" src="/js/app.js"></script>
+
+</body>
+</html>
