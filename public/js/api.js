@@ -94,3 +94,14 @@ export async function listLinks() {
 export async function deleteLink(code) {
   return request('DELETE', `/api/links/${encodeURIComponent(code)}`);
 }
+
+/**
+ * Fetch 7-day click analytics for a short link.
+ *
+ * @param {string} code
+ * @returns {Promise<{ code: string, totalClicks: number, last7Days: Array<{ date: string, clicks: number }> }>}
+ */
+export async function getLinkStats(code) {
+  return request('GET', `/api/links/${encodeURIComponent(code)}/stats`);
+}
+

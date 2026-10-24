@@ -380,6 +380,23 @@ input[type="datetime-local"].input {
   color: var(--success);
 }
 
+/* Stats button — subtle secondary, lives in table rows */
+.btn-stats {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  margin-right: 0.35rem;
+}
+
+.btn-stats:hover {
+  background: var(--surface-alt);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
 /* Delete button — ghost danger, lives in table rows */
 .btn-danger {
   background: transparent;
@@ -804,3 +821,160 @@ input[type="datetime-local"].input {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── 25. Stats Modal Dialog (Phase 5) ─────────────────────────── */
+.stats-dialog {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+  padding: 0;
+  max-width: 440px;
+  width: 90vw;
+  margin: auto;
+}
+
+.stats-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.stats-dialog-content {
+  padding: 1.5rem;
+}
+
+.stats-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.stats-dialog-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.stats-dialog-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.btn-close-dialog {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--t), background var(--t);
+}
+
+.btn-close-dialog:hover {
+  color: var(--text);
+  background: var(--surface-alt);
+}
+
+.btn-close-dialog:focus-visible {
+  outline: 2px solid var(--border-focus);
+}
+
+.stats-summary-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.stats-metric-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.stats-metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-chart-wrapper {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.5rem 0.5rem;
+}
+
+.stats-chart-container {
+  width: 100%;
+}
+
+.stats-chart-container svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* SVG Chart Bar Styling */
+.chart-bar {
+  fill: var(--accent);
+  transition: fill var(--t);
+  cursor: pointer;
+}
+
+.chart-bar:hover,
+.chart-bar:focus-visible {
+  fill: var(--accent-hover);
+  outline: none;
+}
+
+.chart-label {
+  fill: var(--text-muted);
+  font-family: inherit;
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+.chart-value {
+  fill: var(--text);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.chart-grid {
+  stroke: var(--border);
+  stroke-dasharray: 2 2;
+  stroke-width: 1;
+}
+
+.chart-baseline {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.stats-empty-notice {
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.stats-dialog-msg {
+  margin-top: 0.75rem;
+}
+

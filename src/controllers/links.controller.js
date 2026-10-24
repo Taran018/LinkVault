@@ -1,6 +1,7 @@
 'use strict';
 
 const linkService = require('../services/link.service');
+const statsService = require('../services/stats.service');
 
 // Controllers are thin: parse the request, call a service, send the response.
 // They never touch the database directly and never contain business logic.
@@ -34,6 +35,19 @@ async function listLinks(req, res, next) {
 }
 
 /**
+ * GET /api/links/:code/stats
+ * Response 200: { code, totalClicks, last7Days: [...] }
+ */
+async function getLinkStats(req, res, next) {
+  try {
+    const stats = await statsService.getLinkStats(req.params.code);
+    res.status(200).json(stats);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * DELETE /api/links/:code
  * Response 204: no body
  */
@@ -46,4 +60,5 @@ async function deleteLink(req, res, next) {
   }
 }
 
-module.exports = { createLink, listLinks, deleteLink };
+module.exports = { createLink, listLinks, getLinkStats, deleteLink };
+

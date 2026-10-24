@@ -8,7 +8,7 @@
 //
 // Import the API module — the browser resolves this relative to the
 // current script URL because both files are type="module".
-import { createLink, listLinks, deleteLink } from './api.js';
+import { createLink, listLinks, deleteLink, getLinkStats } from './api.js';
 
 // ── Element references ───────────────────────────────────────
 const createForm     = document.getElementById('create-form');
@@ -29,6 +29,14 @@ const emptyState     = document.getElementById('empty-state');
 const tableWrapper   = document.getElementById('table-wrapper');
 const linksBody      = document.getElementById('links-body');
 const tableError     = document.getElementById('table-error');
+
+// Stats Modal elements (Phase 5)
+const statsDialog         = document.getElementById('stats-dialog');
+const statsDialogTitle     = document.getElementById('stats-dialog-title');
+const statsTotalClicks     = document.getElementById('stats-total-clicks');
+const statsChartContainer = document.getElementById('stats-chart-container');
+const statsDialogMsg       = document.getElementById('stats-dialog-msg');
+const btnCloseStats        = document.getElementById('btn-close-stats');
 
 // ── Utility: format expiry date for display ──────────────────
 /**
@@ -227,6 +235,15 @@ function createRow(link) {
   // ── Actions cell ──
   const tdActions = document.createElement('td');
   tdActions.className = 'col-actions';
+
+  const btnStats = document.createElement('button');
+  btnStats.type = 'button';
+  btnStats.className = 'btn btn-stats';
+  btnStats.textContent = 'Stats';
+  btnStats.setAttribute('aria-label', `View analytics for short link ${link.code}`);
+  btnStats.addEventListener('click', () => handleShowStats(link.code));
+  tdActions.appendChild(btnStats);
+
   const btnDel = document.createElement('button');
   btnDel.type = 'button';
   btnDel.className = 'btn btn-danger';
@@ -376,9 +393,132 @@ async function handleCreate(event) {
   }
 }
 
+// ── Stats Dialog and SVG Chart Rendering ─────────────────────
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function clearStatsDialog() {
+  statsChartContainer.replaceChildren();
+  statsDialogMsg.textContent = '';
+  statsDialogMsg.hidden = true;
+}
+
+function renderStatsChart(last7Days) {
+  statsChartContainer.replaceChildren();
+
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 320 140');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', '7-day click activity bar chart');
+
+  const maxClicks = Math.max(...last7Days.map(d => d.clicks), 0);
+  const chartHeight = 85;
+  const baseY = 110;
+  const barWidth = 26;
+  const gap = 16;
+  const startX = 18;
+
+  // Baseline rule
+  const baseline = document.createElementNS(SVG_NS, 'line');
+  baseline.setAttribute('x1', '10');
+  baseline.setAttribute('y1', String(baseY));
+  baseline.setAttribute('x2', '310');
+  baseline.setAttribute('y2', String(baseY));
+  baseline.setAttribute('class', 'chart-baseline');
+  svg.appendChild(baseline);
+
+  last7Days.forEach((day, index) => {
+    const x = startX + index * (barWidth + gap);
+    const height = maxClicks > 0 && day.clicks > 0
+      ? Math.max(Math.round((day.clicks / maxClicks) * chartHeight), 4)
+      : 0;
+    const y = baseY - height;
+
+    // Bar rectangle
+    const rect = document.createElementNS(SVG_NS, 'rect');
+    rect.setAttribute('x', String(x));
+    rect.setAttribute('y', String(y));
+    rect.setAttribute('width', String(barWidth));
+    rect.setAttribute('height', String(height));
+    rect.setAttribute('rx', '3');
+    rect.setAttribute('class', 'chart-bar');
+    rect.setAttribute('tabindex', '0');
+    rect.setAttribute('role', 'graphics-symbol');
+    rect.setAttribute('aria-label', `${day.date}: ${day.clicks} clicks`);
+
+    const title = document.createElementNS(SVG_NS, 'title');
+    title.textContent = `${day.date}: ${day.clicks} clicks`;
+    rect.appendChild(title);
+    svg.appendChild(rect);
+
+    // Click count label above bar
+    if (day.clicks > 0) {
+      const valText = document.createElementNS(SVG_NS, 'text');
+      valText.setAttribute('x', String(x + barWidth / 2));
+      valText.setAttribute('y', String(y - 4));
+      valText.setAttribute('class', 'chart-value');
+      valText.textContent = String(day.clicks);
+      svg.appendChild(valText);
+    }
+
+    // Date label below baseline (MM/DD)
+    const labelText = document.createElementNS(SVG_NS, 'text');
+    labelText.setAttribute('x', String(x + barWidth / 2));
+    labelText.setAttribute('y', String(baseY + 16));
+    labelText.setAttribute('class', 'chart-label');
+    const parts = day.date.split('-');
+    labelText.textContent = parts.length === 3 ? `${parts[1]}/${parts[2]}` : day.date;
+    svg.appendChild(labelText);
+  });
+
+  statsChartContainer.appendChild(svg);
+
+  // If zero clicks across the entire 7 days, show a helpful message
+  if (maxClicks === 0) {
+    const emptyNote = document.createElement('p');
+    emptyNote.className = 'stats-empty-notice';
+    emptyNote.textContent = 'No clicks recorded in the last 7 days.';
+    statsChartContainer.appendChild(emptyNote);
+  }
+}
+
+async function handleShowStats(code) {
+  clearStatsDialog();
+  statsDialogTitle.textContent = `/${code}`;
+  statsTotalClicks.textContent = '…';
+
+  if (typeof statsDialog.showModal === 'function') {
+    statsDialog.showModal();
+  } else {
+    statsDialog.setAttribute('open', '');
+  }
+
+  try {
+    const stats = await getLinkStats(code);
+    statsTotalClicks.textContent = String(stats.totalClicks ?? 0);
+    renderStatsChart(stats.last7Days ?? []);
+  } catch (err) {
+    statsTotalClicks.textContent = '–';
+    statsDialogMsg.textContent = err.message || 'Failed to load statistics.';
+    statsDialogMsg.hidden = false;
+  }
+}
+
 // ── Wire up event listeners ──────────────────────────────────
 createForm.addEventListener('submit', handleCreate);
 btnCopy.addEventListener('click', handleCopy);
+
+// Stats dialog close events
+if (btnCloseStats) {
+  btnCloseStats.addEventListener('click', () => statsDialog.close());
+}
+if (statsDialog) {
+  statsDialog.addEventListener('click', (event) => {
+    // Close dialog if backdrop is clicked
+    if (event.target === statsDialog) {
+      statsDialog.close();
+    }
+  });
+}
 
 // Clear the form error as soon as the user starts typing again.
 inputUrl.addEventListener('input', clearFormError);
