@@ -53,5 +53,17 @@ No framework, no build step — plain HTML, CSS, and vanilla JS in `public/`.
 | `npm test` | Run all Jest tests |
 | `npm run lint` | ESLint |
 
+## Deployment Notes
+
+**Rate limiting and trusted proxy headers:**  
+The production rate limiter identifies clients via the `CF-Connecting-IP` header, which Cloudflare injects at its edge. This is only safe when:
+
+1. The Render service uses a **custom domain** with DNS routed through **Cloudflare's proxy** (orange-cloud mode), and
+2. Direct access to the `.onrender.com` origin URL is **blocked** or not advertised.
+
+If the `.onrender.com` URL is reachable without Cloudflare, a client can send a spoofed `CF-Connecting-IP` header and bypass rate limiting. For a hardened deployment, enable **Cloudflare Authenticated Origin Pulls** so Render only accepts requests carrying Cloudflare's signed certificate.
+
+The rate-limit store is **in-memory**: it resets on each service restart and is not shared across multiple instances. This is acceptable for a single-instance Render deployment on the free plan.
+
 ## Live URL
 _To be added after Render deploy (Phase 6)._

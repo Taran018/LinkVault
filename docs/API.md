@@ -13,7 +13,7 @@ Body: `{ "url": "https://example.com/long", "alias": "join-club" (optional), "ex
 
 ## GET /api/links/:code/stats
 - 200: `{ "code": "...", "totalClicks": 12, "last7Days": [ { "date": "2026-10-20", "clicks": 3 } ] }`
-- 404 `NOT_FOUND`
+- 400 `INVALID_CODE` (malformed `:code` parameter) | 404 `NOT_FOUND`
 
 ## DELETE /api/links/:code
 - 204 no body | 404 `NOT_FOUND`
